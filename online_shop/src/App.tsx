@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import OrdersHistory from './pages/OrdersHistory';
 import OrderDetails from './pages/OrderDetails';
 import Register from './pages/Register';
+import LandingPage from './pages/LandingPage';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -23,7 +24,7 @@ function Navbar() {
         STORE
       </Link>
       <div style={{ display: 'flex', gap: '20px', fontSize: '0.9rem', textTransform: 'uppercase', fontFamily: 'var(--font-body)' }}>
-        <Link to="/">Sklep</Link>
+        <Link to="/shop">Sklep</Link>
         <Link to="/cart">Koszyk</Link>
         <Link to="/login">Konto</Link>
 
@@ -50,7 +51,8 @@ function App() {
       <Navbar />
       <div style={{ padding: '40px' }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/shop" element={<Home />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/login" element={<Login />} />
