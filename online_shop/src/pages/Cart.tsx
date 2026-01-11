@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 function Cart() {
-    const { cartProducts, removeFromCart, updateQuantity, totalPrice } = useCart();
+    const { cartProducts, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
 
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -17,6 +17,40 @@ function Cart() {
 
     const shippingCost = totalPrice > 200 ? 0 : 15;
     const finalTotal = totalPrice + shippingCost;
+
+
+    const handleCheckout = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert("Musisz być zalogowany, aby złożyć zamówienie!");
+            navigate('/login');
+            return;
+        }
+        try {
+            const response = await fetch('http://localhost:3000/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    total: finalTotal,
+                    items: cartProducts
+                })
+            });
+
+            if (response.ok) {
+                alert("Dziękujemy! Zamówienie zostało przyjęte.");
+                clearCart();
+                navigate('/orders');
+            } else {
+                alert("Wystąpił błąd podczas składania zamówienia.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Błąd połączenia z serwerem.");
+        }
+    }
 
     if (cartProducts.length === 0) {
         return (
@@ -104,7 +138,7 @@ function Cart() {
                             <span>${finalTotal.toFixed(2)}</span>
                         </div>
 
-                        <button style={{ width: '100%' }} onClick={() => alert("Przechodzę do płatności")}>
+                        <button style={{ width: '100%' }} onClick={handleCheckout}>
                             PRZEJDŹ DO KASY
                         </button>
 

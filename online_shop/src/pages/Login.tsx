@@ -1,24 +1,28 @@
 import { useState } from "react";
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Login() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e : React.FormEvent) => {
+    const handleSubmit = async (e : React.FormEvent) => {
         e.preventDefault();
-        const success = login(username, password);
+        setError('');
+        setLoading(true);
+        const success = await login(email, password);
 
         if (success) {
             navigate('/');
         } else {
             setError('Nieprawidłowy login lub hasło');
         }
+        setLoading(false);
     };
 
     return (
@@ -28,23 +32,28 @@ function Login() {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 
                 <input 
-                    type="text"
-                    placeholder="Login"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}/>
+                    type="email"
+                    placeholder="Adres E-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required/>
                 
                 <input 
                     type="password"
                     placeholder="Hasło"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}/>
+                    onChange={(e) => setPassword(e.target.value)}
+                    required/>
 
                 {error && <p style={{ color: 'red', fontSize: '0.9rem' }}>{error}</p>}
 
-                <button type="submit" style={{ padding: '15px', fontWeight: 'bold' }}>
-                    ZALOGUJ
+                <button type="submit" disabled={loading} style={{ padding: '15px', fontWeight: 'bold' }}>
+                    {loading ? "LOGOWANIE..." : "ZALOGUJ"}
                 </button>
             </form>
+            <p style={{ marginTop: '20px', fontSize: '0.9rem' }}>
+                <Link to="/register" style={{ textDecoration: 'underline' }}>Stwórz nowe konto</Link>
+            </p>
         </div>
     )
 }

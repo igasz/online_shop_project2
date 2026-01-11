@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { useAuth} from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import ProductDetails from './pages/ProductDetails';
 import Home from './pages/Home';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import OrdersHistory from './pages/OrdersHistory';
 import OrderDetails from './pages/OrderDetails';
+import Register from './pages/Register';
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -30,7 +30,7 @@ function Navbar() {
         {user ? (
           <>
             <Link to="/orders">Zamówienia</Link>
-            <span style={{color: 'var(--color-accent)'}}>Witaj, {user.username}</span>
+            <span style={{color: 'var(--color-accent)'}}>Witaj</span>
             <button onClick={logout} 
               style={{ padding: '5px 10px', fontSize: '0.7rem', marginLeft: '10px' }}>
               Wyloguj
@@ -54,6 +54,7 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/orders" element={<OrdersHistory />} />
           <Route path="/orders/:id" element={<OrderDetails />} />
         </Routes>

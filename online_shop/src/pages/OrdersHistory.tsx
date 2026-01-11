@@ -8,8 +8,29 @@ function OrdersHistory() {
     const { user } = useAuth();
 
     useEffect(() => {
-        setOrders(MOCK_ORDERS);
-    }, []);
+        const fetchOrders = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('http://localhost:3000/orders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const formattedData = data.map((order: any) => ({
+                        ...order,
+                        date: new Date(order.createdAt).toLocaleDateString('pl-PL'), 
+                        status: order.status 
+                    }));
+                    setOrders(formattedData);
+                }
+            } catch (err) {
+                console.error("Błąd pobierania historii", err);
+            }
+        }
+        fetchOrders();
+    }, [user]);
 
     if (!user) {
         return <div style={{padding: '20px'}}>Zaloguj się</div>

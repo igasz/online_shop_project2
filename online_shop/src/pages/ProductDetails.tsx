@@ -18,10 +18,10 @@ interface Product {
 
 interface Review {
     id: number;
-    author: string;
-    email: string;
     rating: number;
     text: string;
+    User?: { email: string }; 
+    UserId?: number;
 }
 
 function ProductDetails() {
@@ -36,16 +36,13 @@ function ProductDetails() {
     const [quantity, setQuantity] = useState<number>(1);
     const [stock] = useState<number>(Math.floor(Math.random() * 20) + 1);
 
-    const [reviews, setReviews] = useState<Review[]>([
-        { id: 1, author: "Paweł M.", email: "pawel@interia.pl", rating: 5, text: "Absolutnie uwielbiam ten produkt! Wygląda jeszcze lepiej na żywo." },
-        { id: 2, author: "Filip Sz.", email: "filip@gmail.com", rating: 4, text: "Dobra jakość, szybka przesyłka." }
-    ]);
-
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [newReviewText, setNewReviewText] = useState("");
-    const [newReviewEmail, setNewReviewEmail] = useState("");
     const [newReviewRating, setNewReviewRating] = useState(5);
     const [error, setError] = useState("");
     const [hover, setHover] = useState(0);
+
+    const hasReviewed = user && reviews.some(r => r.User?.email === user.email);
 
     useEffect(() => {
         if (!id) return;
@@ -56,10 +53,31 @@ function ProductDetails() {
                 setProduct(data);
                 setLoading(false);
             })
-            .catch(err => console.error("Błąd:", err));
+            .catch(err => console.error("Błąd produktu", err));
+
+        const fetchReviews = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/reviews/${id}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        setReviews(data);
+                    } else {
+                        setReviews([]);
+                    }
+                } else {
+                    setReviews([]);
+                }
+            } catch (err) {
+                console.error("Serwer nie odpowiada:", err);
+                setReviews([]);
+            }
+        };
+
+        fetchReviews();
     }, [id]);
 
-    const handleAddReview = (e: React.FormEvent) => {
+    const handleAddReview = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         
@@ -68,37 +86,58 @@ function ProductDetails() {
             return;
         }
         
-        if (!newReviewText || !newReviewEmail) {
-            setError("Wszystkie pola (e-mail i treść) są wymagane.");
+        if (!newReviewText) {
+            setError("Napisz coś!");
             return;
         }
 
-        const alreadyReviewed = reviews.some(r => r.author === user.username);
-        if (alreadyReviewed) {
-            setError("Dodałeś już opinię o tym produkcie.");
-            return;
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('http://localhost:3000/reviews', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    productId: id,
+                    rating: newReviewRating,
+                    text: newReviewText
+                })
+            });
+
+            if (res.ok) {
+                const addedReview = await res.json();
+                setReviews([...reviews, addedReview]); 
+                setNewReviewText("");
+                setNewReviewRating(5);
+                alert("Dziękujemy za opinię!");
+            } else {
+                const errData = await res.json();
+                setError(errData.error || "Błąd dodawania opinii");
+            }
+        } catch (err) {
+            setError("Błąd połączenia z serwerem");
         }
-
-        const review: Review = {
-            id: Date.now(),
-            author: user.username,
-            email: newReviewEmail,
-            rating: newReviewRating,
-            text: newReviewText
-        };
-
-        setReviews(prevReviews => [...prevReviews, review]);
-        
-        setNewReviewText("");
-        setNewReviewEmail("");
-        setNewReviewRating(5); 
-        
-        alert("Dziękujemy za opinię!"); 
     };
 
-    const handleDeleteReview = (reviewId: number, author: string) => {
-        if (user?.role === 'admin' || user?.username === author) {
-            setReviews(reviews.filter(r => r.id !== reviewId));
+    const handleDeleteReview = async (reviewId: number) => {
+        if (!confirm("Czy na pewno chcesz usunąć tę opinię?")) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`http://localhost:3000/reviews/${reviewId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setReviews(reviews.filter(r => r.id !== reviewId));
+            } else {
+                alert("Nie udało się usunąć opinii.");
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -109,7 +148,7 @@ function ProductDetails() {
     };
 
     if (loading) {
-        return <div style={{textAlign: 'center', marginTop: '50px'}}>Ładowanie detali...</div>;
+        return <div style={{textAlign: 'center', marginTop: '50px'}}>Ładowanie...</div>;
     }
     if (!product) {
         return <div>Nie znaleziono produktu.</div>;
@@ -177,18 +216,11 @@ function ProductDetails() {
             <section>
                 <h2>Opinie ({reviews.length})</h2>
 
-                <div style={{ backgroundColor: '#f9f9f9', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
+                <div style={{ padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
                     <h3>Dodaj swoją opinię</h3>
                     {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
                     
                     <form onSubmit={handleAddReview} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <input 
-                            type="email" 
-                            placeholder="Twój e-mail" 
-                            value={newReviewEmail}
-                            onChange={(e) => setNewReviewEmail(e.target.value)}
-                            style={{ padding: '10px' }}
-                        />
     
                         {/* <div class="rating-container">
                             <p>Twoja ocena:</p>
@@ -249,14 +281,16 @@ function ProductDetails() {
 
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {reviews.length === 0 && <p>Brak opinii. Bądź pierwszy!</p>}
+
                     {reviews.map(review => (
-                        <div key={review.id} style={{ borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                        <div key={review.id} style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '15px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <strong>{review.author} — {review.rating}/5 ☆</strong>
+                                <strong>{review.User?.email} — {review.rating}/5 ☆</strong>
                                 
-                                {(user?.role === 'admin' || user?.username === review.author) && ( //admin może usunąć wszystkich
+                                {(user?.role === 'admin' || user?.email === review.User?.email) && ( //admin może usunąć wszystkich
                                     <button 
-                                        onClick={() => handleDeleteReview(review.id, review.author)}
+                                        onClick={() => handleDeleteReview(review.id)}
                                         style={{ backgroundColor: '#ff4d4f', padding: '5px 10px', fontSize: '0.7rem' }}
                                     >
                                         USUŃ

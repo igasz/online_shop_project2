@@ -7,8 +7,26 @@ function OrderDetails() {
     const [order, setOrder] = useState<Order | null>(null);
 
     useEffect(() => {
-        const foundOrder = MOCK_ORDERS.find(o => o.id === Number(id));
-        setOrder(foundOrder || null);
+        const fetchOrder = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('http://localhost:3000/orders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const found = data.find((o: any) => o.id === Number(id));
+                    
+                    if (found) {
+                        found.date = new Date(found.createdAt).toLocaleDateString('pl-PL');
+                        setOrder(found);
+                    }
+                }
+            } catch (err) { console.error(err); }
+        };
+        fetchOrder();
     }, [id]);
 
     if (!order) {
