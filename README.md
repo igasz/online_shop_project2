@@ -44,3 +44,12 @@ Iga Szaflik
 - Rejestracja nowych użytkowników z walidacją haseł.
 - Logowanie z wykorzystaniem tokena JWT (LocalStorage).
 - Hasła w bazie danych są haszowane.
+
+## Konta testowe
+**Administrator:**
+Email: admin@projekt.pl
+Hasło: 123
+
+**Użytkownik 1:**
+Email: student@projekt.pl
+Hasło: 123
