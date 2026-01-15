@@ -23,7 +23,7 @@ Iga Szaflik
 1. Landing Page (Strona Powitalna)
 - układ z podziałem ekranu:
   - lewa sekcja: Grafika "Nowa Kolekcja" przekierowująca do sklepu.
-  - prawa sekcja: Interaktywne kafelki zmieniające się w zależności od stanu zalogowania (niezalogowany: Linki do Logowania i Rejestracji, zalogowany: Linki do Koszyka/Historii zamówień oraz przycisk Wyloguj).
+  - prawa sekcja: Interaktywne kafelki zmieniające się w zależności od stanu zalogowania (niezalogowany: Linki do Logowania i Rejestracji, zalogowany: Link do Koszyka oraz przycisk Wyloguj).
 
 2. Sklep i Produkty
 - Pobieranie i wyświetlanie produktów z zewnętrznego API.
