@@ -1,7 +1,7 @@
 # Online Shop (STORE)
 Wprowadzenie do Aplikacji Internetowych
 
-## Authors:
+## Autorzy:
 Iga Szaflik
 
 ## Użyta technologia i biblioteki
