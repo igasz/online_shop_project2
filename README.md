@@ -45,6 +45,23 @@ Iga Szaflik
 - Logowanie z wykorzystaniem tokena JWT (LocalStorage).
 - Hasła w bazie danych są haszowane.
 
+
+## Setup Projektu (Instrukcja uruchomienia)
+Aplikacja składa się z dwóch części (serwer i klient), które muszą działać jednocześnie.
+
+### Uruchomienie Backendu
+Otwórz terminal w folderze server oraz zainstaluj zależności:
+`npm install`
+Wystartuj serwer:
+`node server.js`
+Serwer uruchomi się na porcie 3000 i utworzy bazę danych.
+
+### Uruchomienie Frontendu
+Otwórz nowy terminal w głównym folderze projektu oraz zainstaluj zależności (tak samo jak w Backend):
+`npm install`
+Uruchom aplikację:
+`npm run dev`
+
 ## Konta testowe
 **Administrator:**
 Email: admin@projekt.pl
